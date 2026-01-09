@@ -1,0 +1,74 @@
+# macOS Finder files
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+
+# macOS temporary and system files
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Ignore all dotfiles except .gitignore itself
+# This should be used with caution as it might ignore other necessary config files
+# .*
+# !.gitignore
+
+# root documentation
+*.docx
+*.pdf
+*.tmp
+
+# ===== Backend (Node.js) =====
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment files
+.env
+.env.*
+
+# Logs
+logs
+*.log
+*.log.*
+log/
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+coverage/
+*.lcov
+
+# Build output
+dist/
+build/
+.tmp/
+.cache/
+
+# ===== Frontend (React) =====
+/frontend/node_modules/
+/frontend/build/
+/frontend/.env
+/frontend/.vite/
+
+# ===== Terraform =====
+*.tfstate
+*.tfstate.backup
+*.tfvars 
+.terraform/
+.terraform.lock.hcl
+.terraform.tfstate.lock.info
+
+# ===== OS/Editor Files =====
+.DS_Store
+Thumbs.db
