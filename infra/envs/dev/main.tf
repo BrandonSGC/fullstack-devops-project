@@ -37,3 +37,38 @@ resource "azurerm_role_assignment" "kv_secrets_officer" {
   principal_id         = data.azurerm_client_config.current.object_id
 }
 
+# Create a random password for the MySQL admin user
+resource "random_password" "mysql_admin" {
+  length  = 20
+  special = true
+}
+
+# Store the MySQL admin password in Key Vault as a secret
+resource "azurerm_key_vault_secret" "mysql_admin_password" {
+  name         = "mysql-admin-password"
+  value        = random_password.mysql_admin.result
+  key_vault_id = module.keyvault.keyvault_id
+
+  # Ensure the role assignment is created before storing the secret, so the deployment doesn't fail due to insufficient permissions
+  depends_on = [
+    azurerm_role_assignment.kv_secrets_officer
+  ]
+}
+
+# MySQL module
+module "mysql" {
+  source = "../../modules/mysql"
+
+  admin_username      = "mysqladminuser"
+  admin_password      = random_password.mysql_admin.result
+  server_name         = "mysql-server-dev-bgcmanaged"
+  rg_name             = azurerm_resource_group.rg.name
+  location            = var.location
+  delegated_subnet_id = module.network.db_subnet_id # We access the db_subnet_id output from the network module
+
+  # Adding dependencies to avoid potential bug in the Azure provider,
+  # where throws the error "Error: Provider produced inconsistent result
+  # after apply", even though the resources are created successfully.
+  depends_on = [module.network.db_subnet_id, azurerm_role_assignment.kv_secrets_officer]
+}
+
