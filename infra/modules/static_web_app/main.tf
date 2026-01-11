@@ -5,4 +5,6 @@ resource "azurerm_static_web_app" "frontend" {
   location            = var.location
   sku_tier            = var.sku_tier
   sku_size            = var.sku_size
+
+  depends_on = [var.rg_name]
 }

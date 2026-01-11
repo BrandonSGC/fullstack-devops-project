@@ -20,5 +20,10 @@ resource "azurerm_linux_web_app" "backend" {
 
   site_config {}
 
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [var.managed_identity_id]
+  }
+
   depends_on = [azurerm_service_plan.plan]
 }

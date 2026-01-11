@@ -26,3 +26,6 @@ variable "backend_subnet_id" {
   type = string
 }
 
+variable "managed_identity_id" {
+  type = string
+}

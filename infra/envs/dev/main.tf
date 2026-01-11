@@ -23,10 +23,9 @@ module "network" {
 
 # Keyvault module
 module "keyvault" {
-  source   = "../../modules/keyvault"
-  rg_name  = azurerm_resource_group.rg.name
-  location = var.location
-
+  source      = "../../modules/keyvault"
+  rg_name     = azurerm_resource_group.rg.name
+  location    = var.location
   name        = "prjctbgc"
   environment = "dev"
 }
@@ -80,25 +79,33 @@ module "mysql" {
 
 # ACR module
 module "container_registry" {
-  source = "../../modules/container_registry"
-
+  source   = "../../modules/container_registry"
   acr_name = "acrprjctbgcdev"
   rg_name  = azurerm_resource_group.rg.name
   location = var.location
   sku      = "Basic"
 }
 
+# Managed Identity module
+module "managed_identity" {
+  source                = "../../modules/managed_identity"
+  rg_name               = azurerm_resource_group.rg.name
+  location              = var.location
+  managed_identity_name = "managed-identity-dev"
+}
+
 # App Service module
 module "appservice" {
   source = "../../modules/appservice"
 
-  rg_name           = azurerm_resource_group.rg.name
-  location          = var.location
-  plan_name         = "fullstack-plan-dev"
-  appservice_name   = "fullstack-appservice-dev"
-  os_type           = "Linux"
-  sku_name          = "B1"
-  backend_subnet_id = module.network.backend_subnet_id
+  rg_name             = azurerm_resource_group.rg.name
+  location            = var.location
+  plan_name           = "fullstack-plan-dev"
+  appservice_name     = "fullstack-appservice-dev"
+  os_type             = "Linux"
+  sku_name            = "B1"
+  backend_subnet_id   = module.network.backend_subnet_id
+  managed_identity_id = module.managed_identity.managed_identity_id
 }
 
 # Static Web App module
