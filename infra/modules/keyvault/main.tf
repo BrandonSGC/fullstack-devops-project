@@ -3,7 +3,7 @@ data "azurerm_client_config" "current" {}
 
 # Create an Azure Key Vault
 resource "azurerm_key_vault" "keyvault" {
-  name                        = "kv-fullstack-${var.environment}-bgc3"
+  name                        = "kv-${var.name}-${var.environment}"
   location                    = var.location
   resource_group_name         = var.rg_name
   enabled_for_disk_encryption = true
