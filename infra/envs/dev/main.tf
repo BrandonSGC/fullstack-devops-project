@@ -27,6 +27,7 @@ module "keyvault" {
   rg_name  = azurerm_resource_group.rg.name
   location = var.location
 
+  name        = "prjctbgc"
   environment = "dev"
 }
 
@@ -81,7 +82,7 @@ module "mysql" {
 module "appservice" {
   source = "../../modules/appservice"
 
-  rg_name           = var.rg_name
+  rg_name           = azurerm_resource_group.rg.name
   location          = var.location
   plan_name         = "fullstack-plan-dev"
   appservice_name   = "fullstack-appservice-dev"
@@ -95,7 +96,7 @@ module "static_web_app" {
   source = "../../modules/static_web_app"
 
   static_webapp_name = "fullstack-frontend-dev"
-  rg_name            = var.rg_name
+  rg_name            = azurerm_resource_group.rg.name
   location           = "eastus2"
   sku_tier           = "Free"
   sku_size           = "Free"
