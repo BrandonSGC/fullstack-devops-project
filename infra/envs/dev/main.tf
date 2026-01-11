@@ -65,7 +65,7 @@ module "mysql" {
 
   admin_username = "mysqladminuser"
   admin_password = random_password.mysql_admin.result
-  server_name    = "mysql-server-dev-bgcmanaged"
+  server_name    = "mysql-server-bgcmnged-dev"
   rg_name        = azurerm_resource_group.rg.name
   location       = var.location
 
@@ -76,6 +76,16 @@ module "mysql" {
   # where throws the error "Error: Provider produced inconsistent result
   # after apply", even though the resources are created successfully.
   depends_on = [module.network.db_subnet_id, azurerm_role_assignment.kv_secrets_officer]
+}
+
+# ACR module
+module "container_registry" {
+  source = "../../modules/container_registry"
+
+  acr_name = "acrprjctbgcdev"
+  rg_name  = azurerm_resource_group.rg.name
+  location = var.location
+  sku      = "Basic"
 }
 
 # App Service module
