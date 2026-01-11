@@ -9,7 +9,8 @@ module "network" {
   # Assign the correct path to the network module
   source = "../../modules/network"
 
-  # Pass variables to the network module from our variables.tf file in this environment
+  # Pass variables to the network module from our variables.tf file 
+  # in this environment
   rg_name  = azurerm_resource_group.rg.name
   location = var.location
 
@@ -29,7 +30,8 @@ module "keyvault" {
   environment = "dev"
 }
 
-# Assign the "Key Vault Secrets Officer" role to the current user/service principal for the Key Vault
+# Assign the "Key Vault Secrets Officer" role to the current user/service 
+# principal for the Key Vault
 data "azurerm_client_config" "current" {}
 resource "azurerm_role_assignment" "kv_secrets_officer" {
   scope                = module.keyvault.keyvault_id
@@ -49,7 +51,8 @@ resource "azurerm_key_vault_secret" "mysql_admin_password" {
   value        = random_password.mysql_admin.result
   key_vault_id = module.keyvault.keyvault_id
 
-  # Ensure the role assignment is created before storing the secret, so the deployment doesn't fail due to insufficient permissions
+  # Ensure the role assignment is created before storing the secret, 
+  # so the deployment doesn't fail due to insufficient permissions
   depends_on = [
     azurerm_role_assignment.kv_secrets_officer
   ]
@@ -59,12 +62,14 @@ resource "azurerm_key_vault_secret" "mysql_admin_password" {
 module "mysql" {
   source = "../../modules/mysql"
 
-  admin_username      = "mysqladminuser"
-  admin_password      = random_password.mysql_admin.result
-  server_name         = "mysql-server-dev-bgcmanaged"
-  rg_name             = azurerm_resource_group.rg.name
-  location            = var.location
-  delegated_subnet_id = module.network.db_subnet_id # We access the db_subnet_id output from the network module
+  admin_username = "mysqladminuser"
+  admin_password = random_password.mysql_admin.result
+  server_name    = "mysql-server-dev-bgcmanaged"
+  rg_name        = azurerm_resource_group.rg.name
+  location       = var.location
+
+  # We access the db_subnet_id output from the network module
+  delegated_subnet_id = module.network.db_subnet_id
 
   # Adding dependencies to avoid potential bug in the Azure provider,
   # where throws the error "Error: Provider produced inconsistent result
@@ -72,3 +77,15 @@ module "mysql" {
   depends_on = [module.network.db_subnet_id, azurerm_role_assignment.kv_secrets_officer]
 }
 
+# App Service module
+module "appservice" {
+  source = "../../modules/appservice"
+
+  rg_name           = var.rg_name
+  location          = var.location
+  plan_name         = "fullstack-plan-dev"
+  appservice_name   = "fullstack-appservice-dev"
+  os_type           = "Linux"
+  sku_name          = "B1"
+  backend_subnet_id = module.network.backend_subnet_id
+}
