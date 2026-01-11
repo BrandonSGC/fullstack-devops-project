@@ -89,3 +89,14 @@ module "appservice" {
   sku_name          = "B1"
   backend_subnet_id = module.network.backend_subnet_id
 }
+
+# Static Web App module
+module "static_web_app" {
+  source = "../../modules/static_web_app"
+
+  static_webapp_name = "fullstack-frontend-dev"
+  rg_name            = var.rg_name
+  location           = "eastus2"
+  sku_tier           = "Free"
+  sku_size           = "Free"
+}
