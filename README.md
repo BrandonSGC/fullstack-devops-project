@@ -89,6 +89,7 @@ This project uses **Trunk-Based Development**, which is common in modern DevOps 
 - **fix**: → bug fix (fix: trigger on CI pipeline)
 - **chore**: → maintenance, config (chore: add eslint config)
 - **docs**: → documentation (docs: update README setup instructions)
+- **refactor**: → Code or infra changed internally without changing behavior.
 - **ci**: → pipeline changes (ci: add GitHub Actions workflow)
 - **infra**: → Terraform changes (infra: create MySQL server)
 
@@ -207,18 +208,40 @@ Containers are started from images using Docker or orchestrated services in the 
 **What is tagging?**  
 A way to mark a specific commit as a release.
 
-
 ### 🧪 Testing
+
 Difference between Unit Tests and Integration Tests:
+
 - **Unit Tests:** Test individual functions or components in isolation. They don’t connect to databases, APIs, or files. Usually use mocks or stubs.
 
 - **Integration Tests:** Test how multiple components work together, for example, the backend interacting with a real or test database.
+
+### 🏗️ Terraform
+
+We handle only the infrastructure with terraform, for the configuration or things related to the application lifecycle we managed it through CI/CD.
+
+**What is the state in terraform?**
+
+Terraform state is Terraform’s memory. It is a file that maps:
+
+- Terraform code ➜ Real Azure resources
+
+**What is the backend.tf?**
+
+In Terraform, backend.tf is the file where Terraform stores its state.
+
+New commands?
+
+```terraform refresh``` -> refresh the state file
+
+We already have the KeyVault, we need to continue with the pipeline to add the secrets for the MySQL module.
 
 ---
 
 ## 🎯 Why This Project?
 
 This project helped me to understand:
+
 - Real-world DevOps workflows
 - Environment isolation
 - CI/CD best practices
