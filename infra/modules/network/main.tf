@@ -21,6 +21,15 @@ resource "azurerm_subnet" "backend" {
       name = "Microsoft.Web/serverFarms"
     }
   }
+
+  # This is to avoid that Terraform can detect false diffs on every 
+  # "terraform plan". We ignore changes to this field to prevent 
+  # unnecessaryin-place updates and keep plans stable and idempotent.
+  lifecycle {
+    ignore_changes = [
+      delegation[0].service_delegation[0].actions
+    ]
+  }
 }
 
 # Subnet for Database.
@@ -35,5 +44,14 @@ resource "azurerm_subnet" "db" {
     service_delegation {
       name = "Microsoft.DBforMySQL/flexibleServers"
     }
+  }
+
+  # This is to avoid that Terraform can detect false diffs on every 
+  # "terraform plan". We ignore changes to this field to prevent 
+  # unnecessaryin-place updates and keep plans stable and idempotent.
+  lifecycle {
+    ignore_changes = [
+      delegation[0].service_delegation[0].actions
+    ]
   }
 }
