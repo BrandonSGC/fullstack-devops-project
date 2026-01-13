@@ -5,6 +5,7 @@
 This repository is not just about code — it documents **how modern companies design, build, test, and deploy software** using DevOps principles.
 
 The goal of this project:
+
 1. 📌 Understanding real-world DevOps workflows.
 2. 📚 **Serve as a personal knowledge base** documenting what I learned, why decisions were made, and how everything fits together.
 
@@ -13,6 +14,7 @@ The goal of this project:
 ## 🧠 Project Overview
 
 This project simulates how a real company delivers software using:
+
 - **One repository**
 - **Multiple environments (Dev / Staging / Prod)**
 - **Dockerized applications**
@@ -43,17 +45,20 @@ Each environment is isolated using its own **Azure Resource Group**:
 ## 🌍 Environments
 
 ### 🔵 Development (DEV)
+
 - Fast feedback loop
 - Cheap infrastructure
 - Automatic deployments from feature branches
 - Safe place to break things
 
 ### 🟡 Staging (Pre-Production)
+
 - Production-like environment
 - Used for validation and testing
 - Deployed automatically from `main`
 
 ### 🔴 Production (PROD)
+
 - Real users
 - Manual approval required
 - Only deployed from version tags
@@ -81,10 +86,12 @@ This project uses **Trunk-Based Development**, which is common in modern DevOps 
 ### Commit Discipline
 
 **👉🏽 Professional Commits:**
+
 - **Small & Frequent** -> one logical change per commit
 - **Clear message** -> explains *what* and *why*, not *how*
 
 **Commit Message Format (Conventional Commits) prefixes:**
+
 - **feat**: → new feature (feat: add user registration API)
 - **fix**: → bug fix (fix: trigger on CI pipeline)
 - **chore**: → maintenance, config (chore: add eslint config)
@@ -98,6 +105,7 @@ This project uses **Trunk-Based Development**, which is common in modern DevOps 
 ## 🐳 Docker
 
 Docker is used to ensure:
+
 - Consistent runtime environments
 - Immutable deployments
 - Build once, deploy many times
@@ -111,12 +119,14 @@ Docker is used to ensure:
 **Purpose:** Ensure code quality and build reliability.
 
 CI does **not** care about environments. It only:
+
 - Runs tests
 - Validates builds
 - Builds Docker images
 - Publishes artifacts
 
 CI runs on:
+
 - Feature branches
 - `main`
 - Tags
@@ -128,6 +138,7 @@ CI runs on:
 **Purpose:** Deliver software to real environments.
 
 CD **does care about environments**. It decides:
+
 - WHERE to deploy
 - WHICH Resource Group to target
 - WHICH secrets to use
@@ -156,7 +167,7 @@ Testing is used as a **quality gate**, not as an afterthought.
 
 ## 🔐 Security & Configuration
 
-- 
+-
 
 ---
 
@@ -178,43 +189,10 @@ Testing is used as a **quality gate**, not as an afterthought.
 
 This section documents concepts learned during the project and is intentionally written in simple language.
 
-### 🐳 Docker
-
-**Important Files**
-
-- `Dockerfile` → Defines how the application image is built
-- `compose.yaml` → Local multi-container development
-- `.dockerignore` → Prevents unnecessary files from being included in images (just like .gitignore)
-
-**Key Concepts**
-
-**What is a container?**  
-A running instance of an image that packages the application and its dependencies.
-
-**What is an image?**  
-A read-only blueprint used to create containers.
-
-**What is a volume?**
-It's a persistent storage managed by Docker to save and share data outside their own filesystem, so data persists across container restarts and can be used by multiple containers.
-
-**What is tagging and why is it important?**  
-Tags identify versions of images (e.g. commit SHA, `v1.0.0`). They allow traceability and safe rollbacks.
-
-**How to run a container?**  
-Containers are started from images using Docker or orchestrated services in the cloud.
-
 ### 🌿 Git / GitHub
 
 **What is tagging?**  
 A way to mark a specific commit as a release.
-
-### 🧪 Testing
-
-Difference between Unit Tests and Integration Tests:
-
-- **Unit Tests:** Test individual functions or components in isolation. They don’t connect to databases, APIs, or files. Usually use mocks or stubs.
-
-- **Integration Tests:** Test how multiple components work together, for example, the backend interacting with a real or test database.
 
 ### 🏗️ Terraform
 
@@ -235,6 +213,256 @@ New commands?
 ```terraform refresh``` -> refresh the state file
 
 We already have the KeyVault, we need to continue with the pipeline to add the secrets for the MySQL module.
+
+### 🐳  Docker
+
+**Important Files:**
+
+- `Dockerfile` → Defines how the application image is built
+- `compose.yaml` → Local multi-container development
+- `.dockerignore` → Prevents unnecessary files from being included in images (just like .gitignore)
+
+**Key Concepts:**
+
+**What is a container?**  
+A running instance of an image that packages the application and its dependencies.
+
+**What is an image?**  
+A read-only blueprint used to create containers.
+
+**What is a volume?**
+It's a persistent storage managed by Docker to save and share data outside their own filesystem, so data persists across container restarts and can be used by multiple containers.
+
+**What is tagging and why is it important?**  
+Tags identify versions of images (e.g. commit SHA, `v1.0.0`). They allow traceability and safe rollbacks.
+
+**How to run a container?**  
+Containers are started from images using Docker or orchestrated services in the cloud.
+
+**What is tagging and why is it important?**
+Tags identify **specific versions** of images.
+
+Examples:
+
+- `mysql:8.0`
+- `backend:v1.2.0`
+- `backend:commit-sha`
+
+Why it matters:
+
+- Reproducible builds
+- Safe rollbacks
+- No accidental breaking changes (`latest` is risky)
+
+#### Commands
+
+**Running Containers:**
+
+Containers are created from images using `docker run`.
+
+**Basic syntax:**
+
+```bash
+docker run [OPTIONS] IMAGE[:TAG] [COMMAND]
+```
+
+**Common docker run options:**
+
+- `--name` -> Assigns a readable name to the container. Example: ```--name mysql```
+- `--network` -> Adds the container to a network. Example: ```--network backend-dev```
+- `--env-file` -> Passes the env vars file. Example: ```--env-file .env```
+- `-e` -> Environment variables. Example: ```-e MYSQL_ROOT_PASSWORD=root```
+- `-p` -> Port mapping. Example: ```-p 3306:3306```
+- `-v` -> For volumes. Example: ```-v volume_name:/container/path```
+- `-d` -> Detached mode (run containers in the background). Example: ```-d```
+
+#### Example: Running a MySQL container
+
+```bash
+docker run \
+docker run \
+  --name mysql \
+  --network dev-network \
+  -e MYSQL_ROOT_PASSWORD=root \
+  -e MYSQL_DATABASE=testdb \
+  -v mysql-data:/var/lib/mysql \
+  -p 3306:3306 \
+  -d mysql:oraclelinux9
+```
+
+#### 🧪 Common Docker Commands
+
+#### Pull an image
+
+```bash
+docker pull <container_name:tag>
+docker pull mysql:oraclelinux9
+```
+
+#### List images
+
+```bash
+docker images
+```
+
+#### List running containers
+
+```bash
+docker ps
+```
+
+#### List all containers
+
+```bash
+docker ps -a
+```
+
+#### Stop a container
+
+```bash
+docker stop <container_name>
+```
+
+#### Start an existing container
+
+```bash
+docker start <container_name>
+docker start mysql
+```
+
+#### Remove a container
+
+```bash
+docker rm <container_name>
+docker rm mysql
+```
+
+#### 📜 Logs & Debugging
+
+#### View logs
+
+```bash
+docker logs mysql
+```
+
+#### Follow logs (live)
+
+```bash
+docker logs -f mysql
+```
+
+#### 🧠 Execute Commands Inside a Container
+
+```bash
+docker exec -it mysql bash
+```
+
+**Explanation:**
+
+- `exec` → run a command in a running container
+- `-i` → interactive
+- `-t` → terminal
+
+bash → shell inside the container
+
+### ⍯ Docker CLI commands vs Docker Compose
+
+Here is the equivalent in both CLI Commands and using docker compose to build and run the images for this project.
+
+**Note**: MySQL container is just for local development...
+
+**CLI commands:**
+
+- `docker build -t fullstack-backend:dev .` -> builds our backend image
+- `docker pull mysql:oraclelinux9` -> pulls docker image
+- `docker network create dev-network` -> creates network
+- `docker run --name mysql --network dev-network -e MYSQL_ROOT_PASSWORD=<password> -e MYSQL_DATABASE=<dbname> -v mysql-data:/var/lib/mysql -p3306:3306 -d mysql:oraclelinux9` -> runs the mysql server and creates the DB
+- `docker runs --name backend-dev --network dev-network --env-file .env -p 3000:3000 -d fullstack-backend:dev` -> runs our container for the backend.
+
+**Docker Compose:**
+
+```yaml
+name: fullstack-devops-project
+
+services:
+  mysql:
+    container_name: mysql
+    image: mysql:oraclelinux9
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+
+  backend:
+    container_name: backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+    depends_on:
+      - mysql
+    restart: unless-stopped
+
+volumes:
+  mysql-data:
+```
+
+**How to run docker compose:**
+
+To build new image and run docker compose:
+
+```bash
+docker compose up --build
+```
+
+To run it in the background:
+
+```bash
+docker compose up --build -d
+```
+
+To run docker compose (without building a new image):
+
+```bash
+docker compose up --build -d
+```
+
+Stop containers (keeping the data):
+
+```bash
+docker compose stop
+```
+
+To stop and delete containers and network:
+
+```bash
+docker compose down
+```
+
+To also delete volumes:
+
+```bash
+docker compose down -v
+```
+
+### 🧪 Testing
+
+Difference between Unit Tests and Integration Tests:
+
+- **Unit Tests:** Test individual functions or components in isolation. They don’t connect to databases, APIs, or files. Usually use mocks or stubs.
+
+- **Integration Tests:** Test how multiple components work together, for example, the backend interacting with a real or test database.
 
 ---
 
