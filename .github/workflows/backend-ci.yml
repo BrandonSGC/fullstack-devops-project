@@ -50,6 +50,7 @@ jobs:
         run: npm install
 
       - name: Run tests
+        working-directory: backend
         env:
           DB_HOST: 127.0.0.1
           DB_PORT: 3306
