@@ -1,0 +1,60 @@
+name: Backend CI
+
+# Trigger the workflow on every pull request to the dev branch
+on:
+  pull_request:
+    branches:
+      - dev
+
+# A job is a set of steps that execute on the same runner
+jobs:
+  test-backend:
+    # This is a runner, A runner is the machine where our CI job 
+    # actually runs.
+    runs-on: ubuntu-latest
+
+    # Services are temporary containers, started only for the job and 
+    # destroyed after the job ends. This is not docker compose.
+    services:
+      mysql:
+        image: mysql:oraclelinux9
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          MYSQL_DATABASE: ${{ secrets.DB_NAME }}
+        ports:
+          - 3306:3306
+        
+        # Set health checks to ensure the database is ready before 
+        # running tests
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    # Steps represent a sequence of tasks that will be executed 
+    # as part of the job
+    steps:
+      # An action is a reusable piece of automation logic. Instead of 
+      # writing scripts ourself, we reuse community or official actions
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.12.0
+
+      - name: Install dependencies
+        working-directory: backend
+        run: npm install
+
+      - name: Run tests
+        working-directory: backend
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+        run: npm test
