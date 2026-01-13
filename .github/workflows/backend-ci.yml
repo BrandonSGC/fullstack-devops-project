@@ -46,6 +46,7 @@ jobs:
           node-version: 24.12.0
 
       - name: Install dependencies
+        working-directory: backend
         run: npm install
 
       - name: Run tests
