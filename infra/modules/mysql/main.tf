@@ -14,3 +14,12 @@ resource "azurerm_mysql_flexible_server" "mysql_server" {
   sku_name              = "B_Standard_B1ms"
   version               = "8.0.21"
 }
+
+// Create DB
+resource "azurerm_mysql_flexible_database" "db" {
+  name                = "usersdb"
+  resource_group_name = var.rg_name
+  server_name         = azurerm_mysql_flexible_server.mysql_server.name
+  charset             = "utf8"
+  collation           = "utf8_unicode_ci"
+}

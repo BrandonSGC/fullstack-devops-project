@@ -20,6 +20,14 @@ resource "azurerm_linux_web_app" "backend" {
 
   site_config {}
 
+  app_settings = {
+    "DB_HOST" = var.DB_HOST
+    "DB_USER" = var.DB_USER
+    "DB_PASS" = var.DB_PASS
+    "DB_NAME" = var.DB_NAME
+    "DB_PORT" = var.DB_PORT
+  }
+
   identity {
     type         = "UserAssigned"
     identity_ids = [var.managed_identity_id]
