@@ -1,0 +1,55 @@
+name: Backend CD (Dev)
+
+on:
+  push:
+    branches:
+      - dev
+
+env:
+  ACR_LOGIN_SERVER: acrprjctbgcdev.azurecr.io
+  APP_SERVICE_NAME: fullstack-appservice-dev
+
+
+jobs:
+  deploy-backend-dev:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Get the code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Login to Azure using the Service Principal
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # Login to Azure Container Registry
+      - name: Login to ACR
+        run: az acr login --name acrprjctbgcdev
+
+      # Build Docker image
+      - name: Build Docker image
+        working-directory: backend
+        run: |
+          IMAGE_TAG=${{ github.sha }}
+          docker build \
+            -t ${{ env.ACR_LOGIN_SERVER }}/backend:${IMAGE_TAG} \
+            .
+
+      # Push Docker image to ACR
+      - name: Push Docker image
+        run: |
+          IMAGE_TAG=${{ github.sha }}
+          docker push ${{ env.ACR_LOGIN_SERVER }}/backend:${IMAGE_TAG}
+
+      # Deploy image to App Service (Dev)
+      - name: Deploy to App Service (Dev)
+        run: |
+          IMAGE_TAG=${{ github.sha }}
+          az webapp config container set \
+            --name ${{ env.APP_SERVICE_NAME }} \
+            --resource-group rg-fullstack-devops-dev \
+            --docker-custom-image-name ${{ env.ACR_LOGIN_SERVER }}/backend:${IMAGE_TAG} \
+            --docker-registry-server-url https://${{ env.ACR_LOGIN_SERVER }}
