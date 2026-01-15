@@ -21,6 +21,11 @@ resource "azurerm_linux_web_app" "backend" {
   site_config {}
 
   app_settings = {
+    # Adding setting to disable App Service storage for Linux 
+    # containers so we dont have issues with terraform updating
+    # the App Service every time we deploy even with no real changes.
+    WEBSITES_ENABLE_APP_SERVICE_STORAGE = "false"
+
     "DB_HOST" = var.DB_HOST
     "DB_USER" = var.DB_USER
     "DB_PASS" = var.DB_PASS

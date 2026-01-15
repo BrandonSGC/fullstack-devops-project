@@ -93,6 +93,14 @@ module "managed_identity" {
   managed_identity_name = "managed-identity-dev"
 }
 
+# Assign the "AcrPull" role to the managed identity so that the 
+# App Service can pull images from the ACR
+resource "azurerm_role_assignment" "acr_pull" {
+  scope                = module.container_registry.id
+  role_definition_name = "AcrPull"
+  principal_id         = module.managed_identity.principal_id
+}
+
 # App Service module
 module "appservice" {
   source = "../../modules/appservice"
@@ -104,7 +112,7 @@ module "appservice" {
   os_type             = "Linux"
   sku_name            = "B1"
   backend_subnet_id   = module.network.backend_subnet_id
-  managed_identity_id = module.managed_identity.managed_identity_id
+  managed_identity_id = module.managed_identity.id
 
   # Environment variables for the App Service to connect to MySQL
   DB_HOST = module.mysql.mysql_hostname
