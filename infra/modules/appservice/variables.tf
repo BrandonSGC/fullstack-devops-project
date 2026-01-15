@@ -38,7 +38,7 @@ variable "DB_USER" {
   type = string
 }
 
-variable "DB_PASS" {
+variable "DB_PASSWORD" {
   type = string
 }
 
@@ -47,9 +47,5 @@ variable "DB_NAME" {
 }
 
 variable "DB_PORT" {
-  type = string
-}
-
-variable "WEBSITES_PORT" {
   type = string
 }

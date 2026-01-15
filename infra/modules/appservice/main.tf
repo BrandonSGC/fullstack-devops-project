@@ -26,10 +26,9 @@ resource "azurerm_linux_web_app" "backend" {
     # the App Service every time we deploy even with no real changes.
     WEBSITES_ENABLE_APP_SERVICE_STORAGE = "false"
 
-    WEBSITES_PORT = var.WEBSITES_PORT
     "DB_HOST"     = var.DB_HOST
     "DB_USER"     = var.DB_USER
-    "DB_PASS"     = var.DB_PASS
+    "DB_PASSWORD" = var.DB_PASSWORD
     "DB_NAME"     = var.DB_NAME
     "DB_PORT"     = var.DB_PORT
   }
