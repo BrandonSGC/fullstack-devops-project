@@ -49,3 +49,7 @@ variable "DB_NAME" {
 variable "DB_PORT" {
   type = string
 }
+
+variable "WEBSITES_PORT" {
+  type = string
+}

@@ -114,6 +114,7 @@ module "appservice" {
   backend_subnet_id   = module.network.backend_subnet_id
   managed_identity_id = module.managed_identity.id
 
+  WEBSITES_PORT = "3000"
   # Environment variables for the App Service to connect to MySQL
   DB_HOST = module.mysql.mysql_hostname
   DB_USER = var.mysql_admin_user
