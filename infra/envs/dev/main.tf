@@ -1,4 +1,4 @@
-# Specify the Azure Resource Group for this environment
+# Resource Group
 resource "azurerm_resource_group" "rg" {
   name     = var.rg_name
   location = var.location
@@ -40,7 +40,7 @@ resource "azurerm_role_assignment" "kv_secrets_officer" {
 }
 
 # Create a random password for the MySQL admin user
-resource "random_password" "mysql_admin" {
+resource "random_password" "generate_password" {
   length  = 20
   special = true
 }
@@ -48,7 +48,7 @@ resource "random_password" "mysql_admin" {
 # Store the MySQL admin password in Key Vault as a secret
 resource "azurerm_key_vault_secret" "mysql_admin_password" {
   name         = "mysql-admin-password"
-  value        = random_password.mysql_admin.result
+  value        = random_password.generate_password.result
   key_vault_id = module.keyvault.keyvault_id
 
   # Ensure the role assignment is created before storing the secret, 
@@ -60,10 +60,9 @@ resource "azurerm_key_vault_secret" "mysql_admin_password" {
 
 # MySQL module
 module "mysql" {
-  source = "../../modules/mysql"
-
-  admin_username = "mysqladminuser"
-  admin_password = random_password.mysql_admin.result
+  source         = "../../modules/mysql"
+  admin_username = var.mysql_admin_user
+  admin_password = random_password.generate_password.result
   server_name    = "mysql-server-bgcmnged-dev"
   rg_name        = azurerm_resource_group.rg.name
   location       = var.location
@@ -94,6 +93,14 @@ module "managed_identity" {
   managed_identity_name = "managed-identity-dev"
 }
 
+# Assign the "AcrPull" role to the managed identity so that the 
+# App Service can pull images from the ACR
+resource "azurerm_role_assignment" "acr_pull" {
+  scope                = module.container_registry.id
+  role_definition_name = "AcrPull"
+  principal_id         = module.managed_identity.principal_id
+}
+
 # App Service module
 module "appservice" {
   source = "../../modules/appservice"
@@ -105,13 +112,20 @@ module "appservice" {
   os_type             = "Linux"
   sku_name            = "B1"
   backend_subnet_id   = module.network.backend_subnet_id
-  managed_identity_id = module.managed_identity.managed_identity_id
+  managed_identity_id = module.managed_identity.id
+
+
+  # Environment variables for the App Service to connect to MySQL
+  DB_HOST     = module.mysql.mysql_hostname
+  DB_USER     = var.mysql_admin_user
+  DB_PASSWORD = random_password.generate_password.result
+  DB_NAME     = module.mysql.mysql_db_name
+  DB_PORT     = "3306"
 }
 
 # Static Web App module
 module "static_web_app" {
-  source = "../../modules/static_web_app"
-
+  source             = "../../modules/static_web_app"
   static_webapp_name = "fullstack-frontend-dev"
   rg_name            = azurerm_resource_group.rg.name
   location           = "eastus2"

@@ -9,3 +9,7 @@ variable "rg_name" {
 variable "location" {
   type = string
 }
+
+variable "mysql_admin_user" {
+  type = string
+}
