@@ -3,7 +3,7 @@ name: Backend CD (Dev)
 on:
   push:
     branches:
-      - dev
+      - cd/backend
 
 env:
   ACR_LOGIN_SERVER: acrprjctbgcdev.azurecr.io
