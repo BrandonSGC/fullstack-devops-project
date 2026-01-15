@@ -45,8 +45,8 @@ jobs:
           IMAGE_TAG=${{ github.sha }}
           docker push ${{ env.ACR_LOGIN_SERVER }}/backend:${IMAGE_TAG}
 
-      # Deploy image to App Service (Dev)
-      - name: Deploy to App Service (Dev)
+      # Deploy image to App Service
+      - name: Deploy to App Service
         run: |
           IMAGE_TAG=${{ github.sha }}
           az webapp config container set \
