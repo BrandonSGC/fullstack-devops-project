@@ -6,3 +6,7 @@ output "appservice_id" {
 output "appservice_service_plan_id" {
   value = azurerm_service_plan.plan.id
 }
+
+output "API_BASE_URL" {
+  value = azurerm_linux_web_app.backend.default_hostname
+}

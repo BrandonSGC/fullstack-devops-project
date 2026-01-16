@@ -18,7 +18,11 @@ resource "azurerm_linux_web_app" "backend" {
   # VNet Integration
   virtual_network_subnet_id = var.backend_subnet_id
 
-  site_config {}
+  site_config {
+    # Enable Managed Identity to pull from ACR
+    container_registry_use_managed_identity       = true
+    container_registry_managed_identity_client_id = var.managed_identity_client_id
+  }
 
   app_settings = {
     # Adding setting to disable App Service storage for Linux 

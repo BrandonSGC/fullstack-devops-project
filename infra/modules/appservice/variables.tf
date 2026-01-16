@@ -30,6 +30,10 @@ variable "managed_identity_id" {
   type = string
 }
 
+variable "managed_identity_client_id" {
+  type = string
+}
+
 variable "DB_HOST" {
   type = string
 }
