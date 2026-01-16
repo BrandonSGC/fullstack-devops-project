@@ -17,3 +17,7 @@ variable "sku_tier" {
 variable "sku_size" {
   type = string
 }
+
+variable "API_BASE_URL" {
+  type = string
+}

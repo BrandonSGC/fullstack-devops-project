@@ -105,15 +105,15 @@ resource "azurerm_role_assignment" "acr_pull" {
 module "appservice" {
   source = "../../modules/appservice"
 
-  rg_name             = azurerm_resource_group.rg.name
-  location            = var.location
-  plan_name           = "fullstack-plan-dev"
-  appservice_name     = "fullstack-appservice-dev"
-  os_type             = "Linux"
-  sku_name            = "B1"
-  backend_subnet_id   = module.network.backend_subnet_id
-  managed_identity_id = module.managed_identity.id
-
+  rg_name                    = azurerm_resource_group.rg.name
+  location                   = var.location
+  plan_name                  = "fullstack-plan-dev"
+  appservice_name            = "fullstack-appservice-dev"
+  os_type                    = "Linux"
+  sku_name                   = "B1"
+  backend_subnet_id          = module.network.backend_subnet_id
+  managed_identity_id        = module.managed_identity.id
+  managed_identity_client_id = module.managed_identity.client_id
 
   # Environment variables for the App Service to connect to MySQL
   DB_HOST     = module.mysql.mysql_hostname
@@ -131,4 +131,5 @@ module "static_web_app" {
   location           = "eastus2"
   sku_tier           = "Free"
   sku_size           = "Free"
+  API_BASE_URL       = "${module.appservice.API_BASE_URL}/api"
 }
