@@ -43,12 +43,25 @@ resource "azurerm_role_assignment" "kv_secrets_officer" {
 resource "random_password" "generate_password" {
   length  = 20
   special = true
+
+  # Keepers ensure a new password is generated only when the server 
+  # name changes
+  keepers = {
+    mysql_server_name = "mysql-server-bgcmnged-dev"
+  }
 }
+
+# Read the MySQL admin password from Key Vault
+data "azurerm_key_vault_secret" "mysql_admin_password" {
+  name         = "mysql-admin-password"
+  key_vault_id = module.keyvault.keyvault_id
+}
+
 
 # Store the MySQL admin password in Key Vault as a secret
 resource "azurerm_key_vault_secret" "mysql_admin_password" {
   name         = "mysql-admin-password"
-  value        = random_password.generate_password.result
+  value        = data.azurerm_key_vault_secret.mysql_admin_password.value
   key_vault_id = module.keyvault.keyvault_id
 
   # Ensure the role assignment is created before storing the secret, 
@@ -62,7 +75,7 @@ resource "azurerm_key_vault_secret" "mysql_admin_password" {
 module "mysql" {
   source         = "../../modules/mysql"
   admin_username = var.mysql_admin_user
-  admin_password = random_password.generate_password.result
+  admin_password = data.azurerm_key_vault_secret.mysql_admin_password.value
   server_name    = "mysql-server-bgcmnged-dev"
   rg_name        = azurerm_resource_group.rg.name
   location       = var.location
@@ -118,7 +131,7 @@ module "appservice" {
   # Environment variables for the App Service to connect to MySQL
   DB_HOST     = module.mysql.mysql_hostname
   DB_USER     = var.mysql_admin_user
-  DB_PASSWORD = random_password.generate_password.result
+  DB_PASSWORD = data.azurerm_key_vault_secret.mysql_admin_password.value
   DB_NAME     = module.mysql.mysql_db_name
   DB_PORT     = "3306"
 }
