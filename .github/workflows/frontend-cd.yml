@@ -42,3 +42,9 @@ jobs:
           action: upload
           app_location: "frontend"
           output_location: "dist"
+          # The following line stops the action from trying to 
+          # build the app again (We already built it in a previous 
+          # step), without this line the deployment would fail due
+          # that this action uses a different node version than the 
+          # one we used to build the frontend.
+          skip_app_build: true 
