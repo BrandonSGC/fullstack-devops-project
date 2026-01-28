@@ -1,0 +1,62 @@
+name: Frontend CD
+
+on:
+  push:
+    branches:
+      - cd/frontend
+
+env:
+    RESOURCE_GROUP: rg-fullstack-devops-dev
+    BACKEND_APP_NAME: fullstack-appservice-dev
+
+jobs:
+  deploy-frontend-dev:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.12.0
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm install
+      
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # Get the Backend API URL from the deployed backend app service
+      # and set it as an environment variable for the frontend build
+      - name: Get Backend API URL from Azure
+        run: |
+          API_HOST=$(az webapp show \
+            --resource-group $RESOURCE_GROUP \
+            --name $BACKEND_APP_NAME \
+            --query defaultHostName \
+            -o tsv)
+
+          echo "VITE_API_BASE_URL=https://$API_HOST/api" >> $GITHUB_ENV
+      
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_DEV }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: upload
+          app_location: "frontend/dist"
+          # The following line stops the action from trying to 
+          # build the app again (We already built it in a previous 
+          # step), without this line the deployment would fail due
+          # that this action uses a different node version than the 
+          # one we used to build the frontend.
+          skip_app_build: true 
