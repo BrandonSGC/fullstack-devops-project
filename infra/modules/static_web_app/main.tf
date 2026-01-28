@@ -6,9 +6,5 @@ resource "azurerm_static_web_app" "frontend" {
   sku_tier            = var.sku_tier
   sku_size            = var.sku_size
 
-  app_settings = {
-    VITE_API_BASE_URL = var.API_BASE_URL
-  }
-
   depends_on = [var.rg_name]
 }

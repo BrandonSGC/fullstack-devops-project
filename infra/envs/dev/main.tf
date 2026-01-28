@@ -144,5 +144,4 @@ module "static_web_app" {
   location           = "eastus2"
   sku_tier           = "Free"
   sku_size           = "Free"
-  API_BASE_URL       = "${module.appservice.API_BASE_URL}/api"
 }
